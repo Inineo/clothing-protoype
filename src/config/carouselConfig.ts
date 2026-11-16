@@ -20,5 +20,5 @@ export const CAROUSEL_SIZING_CONFIG = {
   scaleDefault: 1.0,   // Baju non-aktif tetap ukuran 1.0 penuh
 
   // Sudut hadap samping (derajat)
-  sideRotationY: 45,   // Menghadap ke kiri
+  sideRotationY: 65,   // Menghadap ke kiri
 };

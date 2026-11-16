@@ -6,23 +6,38 @@ import Image from 'next/image';
 interface HangingGarmentProps {
   image: string;
   name: string;
-  offsetY?: number;
   height?: number;
+  offsetY?: number;
+  offsetX?: number;
+  scale?: number;
+  rotateZ?: number;
 }
 
-export function HangingGarment({ image, name, offsetY = 0, height = 480 }: HangingGarmentProps) {
+export function HangingGarment({
+  image,
+  name,
+  height = 580,
+  offsetY = 0,
+  offsetX = 0,
+  scale = 1,
+  rotateZ = 0,
+}: HangingGarmentProps) {
+  const transformStyle = `translate(${offsetX}px, ${offsetY}px) scale(${scale}) rotate(${rotateZ}deg)`;
+
   return (
     <div
       className="relative w-full flex justify-center items-start select-none"
-      style={{ transform: `translateY(${offsetY}px)` }}
+      style={{
+        transform: transformStyle,
+        transformOrigin: 'top center',
+      }}
     >
       {/* 
-        1. Silhouette Wall Shadow (Fade radial di tepi agar tidak terpotong garis lurus kotak gambar)
+        1. Silhouette Wall Shadow (Fade radial halus di tepi)
       */}
       <div
         className="absolute inset-0 flex justify-center items-start pointer-events-none z-0"
         style={{
-          // Masking radial halus ke bawah dan samping agar gradasi bayangan membaur lembut ke dinding
           maskImage: 'radial-gradient(ellipse 75% 75% at 50% 45%, black 40%, transparent 95%)',
           WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 45%, black 40%, transparent 95%)',
         }}
@@ -32,9 +47,9 @@ export function HangingGarment({ image, name, offsetY = 0, height = 480 }: Hangi
           alt=""
           aria-hidden="true"
           width={500}
-          height={600}
+          height={650}
           style={{ height: `${height}px` }}
-          className="object-contain w-auto blur-[16px] opacity-25 brightness-0 scale-[0.98] translate-y-6 translate-x-2 select-none"
+          className="object-contain w-auto blur-[11px] opacity-45 brightness-0 scale-[0.94] translate-y-6 translate-x-5 select-none"
           priority
         />
       </div>
@@ -47,7 +62,7 @@ export function HangingGarment({ image, name, offsetY = 0, height = 480 }: Hangi
           src={image}
           alt={name}
           width={500}
-          height={600}
+          height={650}
           style={{ height: `${height}px` }}
           className="object-contain w-auto pointer-events-none"
           priority

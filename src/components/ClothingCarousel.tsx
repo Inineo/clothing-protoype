@@ -105,7 +105,7 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                   animate={{
                     scale,
                     rotateY,
-                    opacity: isOffscreen ? 0 : isSelected ? 1 : 0.65,
+                    opacity: isOffscreen ? 0 : 1, // Solid 100% untuk semua baju
                   }}
                   transition={{ type: 'spring', stiffness: 290, damping: 26 }}
                   className="w-full h-[620px] flex items-start justify-center cursor-pointer origin-top"
@@ -114,8 +114,11 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                   <HangingGarment
                     image={product.image}
                     name={product.name}
-                    offsetY={product.offsetY ?? 0}
                     height={product.height ?? CAROUSEL_SIZING_CONFIG.defaultHeight}
+                    offsetY={product.offsetY ?? 0}
+                    offsetX={product.offsetX ?? 0}
+                    scale={product.scale ?? 1}
+                    rotateZ={product.rotateZ ?? 0}
                   />
                 </motion.div>
               </div>
