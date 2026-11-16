@@ -5,12 +5,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { motion } from 'framer-motion';
 import { Product } from '@/data/products';
 import { HangingGarment } from './HangingGarment';
-
-// ==========================================
-// 🛠️ PENGATURAN GLOBAL
-// ==========================================
-export const GLOBAL_OFFSET_Y = -38;
-export const DEFAULT_HEIGHT = 480;
+import { CAROUSEL_SIZING_CONFIG } from '@/config/carouselConfig';
 
 interface ClothingCarouselProps {
   products: Product[];
@@ -18,6 +13,10 @@ interface ClothingCarouselProps {
 }
 
 export function ClothingCarousel({ products, onSelectProduct }: ClothingCarouselProps) {
+  // Duplikasi 3x agar infinite loop Embla punya cukup buffer di kiri dan kanan tanpa glitch
+  const displayItems = products.length < 15 ? [...products, ...products, ...products] : products;
+  const total = displayItems.length;
+
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -25,16 +24,19 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
     align: 'center',
     skipSnaps: false,
     dragFree: false,
+    containScroll: false,
   });
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    const index = emblaApi.selectedScrollSnap();
-    setSelectedIndex(index);
-    if (products[index]) {
-      onSelectProduct(products[index]);
+    const snapIndex = emblaApi.selectedScrollSnap();
+    setSelectedIndex(snapIndex);
+
+    const actualProduct = displayItems[snapIndex % displayItems.length];
+    if (actualProduct) {
+      onSelectProduct(actualProduct);
     }
-  }, [emblaApi, products, onSelectProduct]);
+  }, [emblaApi, displayItems, onSelectProduct]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -65,41 +67,56 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
       {/* Embla Viewport */}
       <div
         className="overflow-hidden w-full cursor-grab active:cursor-grabbing relative z-20"
-        style={{ marginTop: `${GLOBAL_OFFSET_Y}px` }}
+        style={{
+          marginTop: `${CAROUSEL_SIZING_CONFIG.globalOffsetY}px`,
+          perspective: '1400px',
+        }}
         ref={emblaRef}
       >
         <div className="flex touch-pan-y">
-          {products.map((product, index) => {
+          {displayItems.map((product, index) => {
             const isSelected = index === selectedIndex;
 
-            // Sudut kemiringan halus seperti di gambar referensi (tidak gepeng)
-            const diff = index - selectedIndex;
-            const rotateZ = isSelected ? 0 : diff < 0 ? -4 : 4;
-            const skewY = isSelected ? 0 : diff < 0 ? -3 : 3;
+            // Hitung jarak lingkaran loop terdekat
+            let diff = index - selectedIndex;
+            if (diff > total / 2) diff -= total;
+            if (diff < -total / 2) diff += total;
+
+            // Sembunyikan item yang jauh di luar layar agar tidak melintas terbang saat Embla teleport
+            const isOffscreen = Math.abs(diff) >= 3;
+
+            // Baju non-aktif menghadap ke kiri, baju aktif menghadap depan
+            const rotateY = isSelected ? 0 : CAROUSEL_SIZING_CONFIG.sideRotationY;
+            const scale = isSelected ? CAROUSEL_SIZING_CONFIG.scaleSelected : CAROUSEL_SIZING_CONFIG.scaleDefault;
 
             return (
               <div
-                key={product.id}
+                key={`${product.id}-${index}`}
                 onClick={() => scrollTo(index)}
-                className="flex-[0_0_55%] sm:flex-[0_0_42%] md:flex-[0_0_34%] lg:flex-[0_0_28%] min-w-0 px-3 flex justify-center transition-transform"
+                className={`${CAROUSEL_SIZING_CONFIG.slideWidthClass} ${CAROUSEL_SIZING_CONFIG.overlapMarginClass} min-w-0 flex justify-center transition-transform`}
                 style={{
-                  zIndex: isSelected ? 30 : 20 - Math.abs(diff),
+                  zIndex: isSelected ? 40 : Math.max(1, 30 - Math.abs(diff)),
+                  visibility: isOffscreen ? 'hidden' : 'visible', // Mencegah baju melintas di background
                 }}
               >
                 <motion.div
                   animate={{
-                    scale: 1,
-                    opacity: isSelected ? 1 : 0.45,
-                    rotateZ: rotateZ,
+                    scale,
+                    rotateY,
+                    opacity: isOffscreen ? 0 : isSelected ? 1 : 0.65,
+                    filter: isSelected
+                      ? 'drop-shadow(0 25px 35px rgba(0,0,0,0.38))'
+                      : 'drop-shadow(0 10px 18px rgba(0,0,0,0.2))',
                   }}
-                  transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-                  className="w-full h-[490px] flex items-start justify-center cursor-pointer origin-top"
+                  transition={{ type: 'spring', stiffness: 290, damping: 26 }}
+                  className="w-full h-[520px] flex items-start justify-center cursor-pointer origin-top"
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
                   <HangingGarment
                     image={product.image}
                     name={product.name}
                     offsetY={product.offsetY ?? 0}
-                    height={product.height ?? DEFAULT_HEIGHT}
+                    height={product.height ?? CAROUSEL_SIZING_CONFIG.defaultHeight}
                   />
                 </motion.div>
               </div>
