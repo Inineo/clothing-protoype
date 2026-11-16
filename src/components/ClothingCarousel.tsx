@@ -13,7 +13,6 @@ interface ClothingCarouselProps {
 }
 
 export function ClothingCarousel({ products, onSelectProduct }: ClothingCarouselProps) {
-  // Duplikasi 3x agar infinite loop Embla punya cukup buffer di kiri dan kanan tanpa glitch
   const displayItems = products.length < 15 ? [...products, ...products, ...products] : products;
   const total = displayItems.length;
 
@@ -64,12 +63,18 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
         <div className="absolute top-[16px] left-0 right-0 h-3 bg-black/15 blur-md" />
       </div>
 
-      {/* Embla Viewport */}
+      {/* Embla Viewport dengan soft edge feather tipis (hanya 3% di tepi ujung) */}
       <div
         className="overflow-hidden w-full cursor-grab active:cursor-grabbing relative z-20"
         style={{
           marginTop: `${CAROUSEL_SIZING_CONFIG.globalOffsetY}px`,
           perspective: '1400px',
+          maskImage:
+            'linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%), linear-gradient(to bottom, black 94%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%), linear-gradient(to bottom, black 94%, transparent 100%)',
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'destination-in',
         }}
         ref={emblaRef}
       >
@@ -77,15 +82,12 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
           {displayItems.map((product, index) => {
             const isSelected = index === selectedIndex;
 
-            // Hitung jarak lingkaran loop terdekat
             let diff = index - selectedIndex;
             if (diff > total / 2) diff -= total;
             if (diff < -total / 2) diff += total;
 
-            // Sembunyikan item yang jauh di luar layar agar tidak melintas terbang saat Embla teleport
             const isOffscreen = Math.abs(diff) >= 3;
 
-            // Baju non-aktif menghadap ke kiri, baju aktif menghadap depan
             const rotateY = isSelected ? 0 : CAROUSEL_SIZING_CONFIG.sideRotationY;
             const scale = isSelected ? CAROUSEL_SIZING_CONFIG.scaleSelected : CAROUSEL_SIZING_CONFIG.scaleDefault;
 
@@ -96,7 +98,7 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                 className={`${CAROUSEL_SIZING_CONFIG.slideWidthClass} ${CAROUSEL_SIZING_CONFIG.overlapMarginClass} min-w-0 flex justify-center transition-transform`}
                 style={{
                   zIndex: isSelected ? 40 : Math.max(1, 30 - Math.abs(diff)),
-                  visibility: isOffscreen ? 'hidden' : 'visible', // Mencegah baju melintas di background
+                  visibility: isOffscreen ? 'hidden' : 'visible',
                 }}
               >
                 <motion.div
@@ -104,12 +106,9 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                     scale,
                     rotateY,
                     opacity: isOffscreen ? 0 : isSelected ? 1 : 0.65,
-                    filter: isSelected
-                      ? 'drop-shadow(0 25px 35px rgba(0,0,0,0.38))'
-                      : 'drop-shadow(0 10px 18px rgba(0,0,0,0.2))',
                   }}
                   transition={{ type: 'spring', stiffness: 290, damping: 26 }}
-                  className="w-full h-[520px] flex items-start justify-center cursor-pointer origin-top"
+                  className="w-full h-[620px] flex items-start justify-center cursor-pointer origin-top"
                   style={{ transformStyle: 'preserve-3d' }}
                 >
                   <HangingGarment

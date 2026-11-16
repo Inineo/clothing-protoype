@@ -19,8 +19,8 @@ export default function Home() {
       {/* Top Header */}
       <Header />
 
-      {/* Centerpiece: Carousel & Product Info */}
-      <div className="w-full flex-1 flex flex-col items-center justify-center pt-24 pb-20 relative z-20">
+      {/* Centerpiece: Carousel & Product Info (pt-20 memberikan posisi ideal tidak terlalu naik dan tidak terlalu turun) */}
+      <div className="w-full flex-1 flex flex-col items-center justify-start pt-20 pb-12 relative z-20">
         <ClothingCarousel
           products={PRODUCTS}
           onSelectProduct={setSelectedProduct}
