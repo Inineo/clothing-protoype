@@ -12,7 +12,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   if (!product) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center text-center mt-2 relative z-30 select-none">
+    <div className="flex flex-col items-center justify-center text-center -mt-10 relative z-30 select-none">
       <AnimatePresence mode="wait">
         <motion.div
           key={product.id}

@@ -41,20 +41,20 @@ export function HangingGarment({
           alt=""
           aria-hidden="true"
           width={500}
-          height={650}
+          height={800}
           style={{ height: `${height}px` }}
-          className="object-contain w-auto blur-[11px] opacity-45 brightness-0 scale-[0.94] translate-y-6 translate-x-5 select-none"
+          className="object-contain w-auto blur-[11px] opacity-45 brightness-0 scale-[0.94] translate-y-6 translate-x-5 select-none overflow-visible"
           priority
         />
       </div>
 
       {/* 2. Gambar Baju Asli */}
-      <div className="relative z-10 flex justify-center items-start">
+      <div className="relative z-10 flex justify-center items-start overflow-visible">
         <Image
           src={image}
           alt={name}
           width={500}
-          height={650}
+          height={800}
           style={{ height: `${height}px` }}
           className="object-contain w-auto pointer-events-none"
           priority

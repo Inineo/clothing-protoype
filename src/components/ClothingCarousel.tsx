@@ -153,7 +153,7 @@ export function ClothingCarousel({
                     stiffness: 240,
                     damping: 28,
                   }}
-                  className="relative w-full h-[760px] flex items-start justify-center cursor-pointer origin-center"
+                  className="relative w-full h-[720px] flex items-start justify-center cursor-pointer origin-center overflow-visible"
                 >
                   {/* LAYER FRONT */}
                   <motion.div
