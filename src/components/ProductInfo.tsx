@@ -12,7 +12,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
   if (!product) return null;
 
   return (
-    <div className="flex flex-col items-center justify-center text-center mt-12 select-none h-20">
+    <div className="flex flex-col items-center justify-center text-center mt-2 relative z-30 select-none">
       <AnimatePresence mode="wait">
         <motion.div
           key={product.id}
@@ -23,12 +23,12 @@ export function ProductInfo({ product }: ProductInfoProps) {
           className="flex flex-col items-center"
         >
           {/* Nama Baju Putih Solid dengan Shadow */}
-          <h2 className="text-base font-extrabold tracking-wider text-white uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <h2 className="text-sm font-extrabold tracking-wider text-white uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
             {product.name}
           </h2>
 
           {/* Badge Harga Putih Frosted Glass */}
-          <div className="mt-2 inline-flex items-center px-4 py-1 rounded-full bg-white/20 backdrop-blur-md text-white shadow-lg border border-white/30">
+          <div className="mt-1.5 inline-flex items-center px-4 py-1 rounded-full bg-white/20 backdrop-blur-md text-white shadow-lg border border-white/30">
             <span className="text-xs font-bold tracking-widest drop-shadow-sm">
               ${product.price}
             </span>

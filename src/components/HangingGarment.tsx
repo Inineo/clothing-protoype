@@ -32,15 +32,9 @@ export function HangingGarment({
         transformOrigin: 'top center',
       }}
     >
-      {/* 
-        1. Silhouette Wall Shadow (Fade radial halus di tepi)
-      */}
+      {/* 1. Silhouette Wall Shadow */}
       <div
         className="absolute inset-0 flex justify-center items-start pointer-events-none z-0"
-        style={{
-          maskImage: 'radial-gradient(ellipse 75% 75% at 50% 45%, black 40%, transparent 95%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 45%, black 40%, transparent 95%)',
-        }}
       >
         <Image
           src={image}
@@ -54,9 +48,7 @@ export function HangingGarment({
         />
       </div>
 
-      {/* 
-        2. Gambar Baju Asli
-      */}
+      {/* 2. Gambar Baju Asli */}
       <div className="relative z-10 flex justify-center items-start">
         <Image
           src={image}

@@ -9,11 +9,11 @@ export const CAROUSEL_SIZING_CONFIG = {
   // Offset vertikal menempel ke rail (pixel)
   globalOffsetY: -44,
 
-  // Lebar kolom slide di carousel
-  slideWidthClass: 'flex-[0_0_62%] sm:flex-[0_0_48%] md:flex-[0_0_38%] lg:flex-[0_0_34%]',
+  // Lebar kolom slide di carousel (proporsional agar center pas di tengah viewport)
+  slideWidthClass: 'flex-[0_0_55%] sm:flex-[0_0_42%] md:flex-[0_0_34%] lg:flex-[0_0_30%]',
 
-  // Margin rapat antar baju
-  overlapMarginClass: '-mx-6 sm:-mx-8 lg:-mx-10',
+  // Margin rapat antar baju (tanpa margin negatif ekstrem yang merusak loop dan snap center Embla)
+  overlapMarginClass: 'px-0',
 
   // Skala ukuran
   scaleSelected: 1.15, // Baju aktif maju dan diperbesar sedikit

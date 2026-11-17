@@ -63,18 +63,16 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
         <div className="absolute top-[16px] left-0 right-0 h-3 bg-black/15 blur-md" />
       </div>
 
-      {/* Embla Viewport dengan soft edge feather tipis (hanya 3% di tepi ujung) */}
+      {/* Embla Viewport (Hanya batas kiri dan kanan, bawah bebas tanpa potongan) */}
       <div
-        className="overflow-hidden w-full cursor-grab active:cursor-grabbing relative z-20"
+        className="w-full cursor-grab active:cursor-grabbing relative z-20"
         style={{
           marginTop: `${CAROUSEL_SIZING_CONFIG.globalOffsetY}px`,
-          perspective: '1400px',
+          perspective: '1200px',
           maskImage:
-            'linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%), linear-gradient(to bottom, black 94%, transparent 100%)',
+            'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
           WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%), linear-gradient(to bottom, black 94%, transparent 100%)',
-          maskComposite: 'intersect',
-          WebkitMaskComposite: 'destination-in',
+            'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
         }}
         ref={emblaRef}
       >
@@ -88,8 +86,25 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
 
             const isOffscreen = Math.abs(diff) >= 3;
 
-            const rotateY = isSelected ? 0 : CAROUSEL_SIZING_CONFIG.sideRotationY;
-            const scale = isSelected ? CAROUSEL_SIZING_CONFIG.scaleSelected : CAROUSEL_SIZING_CONFIG.scaleDefault;
+            // Transform front vs side
+            const frontT = product.front;
+            const sideT = product.side;
+
+            const frontHeight = frontT?.height ?? CAROUSEL_SIZING_CONFIG.defaultHeight;
+            const frontOffsetY = frontT?.offsetY ?? 0;
+            const frontOffsetX = frontT?.offsetX ?? 0;
+            const frontScale = (frontT?.scale ?? 1) * CAROUSEL_SIZING_CONFIG.scaleSelected;
+            const frontRotateZ = frontT?.rotateZ ?? 0;
+
+            const sideHeight = sideT?.height ?? CAROUSEL_SIZING_CONFIG.defaultHeight;
+            const sideOffsetY = sideT?.offsetY ?? 0;
+            const sideOffsetX = sideT?.offsetX ?? 0;
+            const sideScale = (sideT?.scale ?? 1) * CAROUSEL_SIZING_CONFIG.scaleDefault;
+            const sideRotateZ = sideT?.rotateZ ?? 0;
+
+            // Kerapatan visual baju samping ditarik mendekat ke center tanpa merusak layout Embla:
+            // Baju sebelah kiri ditarik ke kanan, baju sebelah kanan ditarik ke kiri
+            const sideShiftX = isSelected ? 0 : diff < 0 ? 55 : -55;
 
             return (
               <div
@@ -101,26 +116,64 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                   visibility: isOffscreen ? 'hidden' : 'visible',
                 }}
               >
-                <motion.div
-                  animate={{
-                    scale,
-                    rotateY,
-                    opacity: isOffscreen ? 0 : 1, // Solid 100% untuk semua baju
+                <div
+                  className="relative w-full h-[680px] flex items-start justify-center cursor-pointer origin-top transition-transform duration-300"
+                  style={{
+                    transform: `translateX(${sideShiftX}px)`,
                   }}
-                  transition={{ type: 'spring', stiffness: 290, damping: 26 }}
-                  className="w-full h-[620px] flex items-start justify-center cursor-pointer origin-top"
-                  style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <HangingGarment
-                    image={product.image}
-                    name={product.name}
-                    height={product.height ?? CAROUSEL_SIZING_CONFIG.defaultHeight}
-                    offsetY={product.offsetY ?? 0}
-                    offsetX={product.offsetX ?? 0}
-                    scale={product.scale ?? 1}
-                    rotateZ={product.rotateZ ?? 0}
-                  />
-                </motion.div>
+                  {/* LAYER FRONT: Muncul dengan putaran halus dari samping ke depan saat dipilih */}
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      opacity: isOffscreen ? 0 : isSelected ? 1 : 0,
+                      rotateY: isSelected ? 0 : -20,
+                      scale: isSelected ? 1 : 0.94,
+                    }}
+                    transition={{
+                      duration: 0.38,
+                      ease: [0.25, 1, 0.5, 1],
+                    }}
+                    style={{ transformOrigin: 'top center' }}
+                    className="absolute inset-0 flex justify-center pointer-events-none"
+                  >
+                    <HangingGarment
+                      image={product.frontImage}
+                      name={product.name}
+                      height={frontHeight}
+                      offsetY={frontOffsetY}
+                      offsetX={frontOffsetX}
+                      scale={frontScale}
+                      rotateZ={frontRotateZ}
+                    />
+                  </motion.div>
+
+                  {/* LAYER SIDE: Menghilang halus sambil berputar saat baju menjadi aktif di tengah */}
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      opacity: isOffscreen ? 0 : isSelected ? 0 : 1,
+                      rotateY: isSelected ? 20 : 0,
+                      scale: isSelected ? 1.06 : 1,
+                    }}
+                    transition={{
+                      duration: 0.38,
+                      ease: [0.25, 1, 0.5, 1],
+                    }}
+                    style={{ transformOrigin: 'top center' }}
+                    className="absolute inset-0 flex justify-center pointer-events-none"
+                  >
+                    <HangingGarment
+                      image={product.sideImage}
+                      name={product.name}
+                      height={sideHeight}
+                      offsetY={sideOffsetY}
+                      offsetX={sideOffsetX}
+                      scale={sideScale}
+                      rotateZ={sideRotateZ}
+                    />
+                  </motion.div>
+                </div>
               </div>
             );
           })}
