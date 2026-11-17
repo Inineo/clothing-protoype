@@ -18,14 +18,17 @@ export function ProductDetailPanel({ product, onClose, onAddToCart }: ProductDet
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-end pr-12 md:pr-24 lg:pr-32 select-none">
-      <motion.div
-        initial={{ opacity: 0, x: 40, scale: 0.95 }}
-        animate={{ opacity: 1, x: 0, scale: 1 }}
-        exit={{ opacity: 0, x: 40, scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-        className="pointer-events-auto w-full max-w-sm bg-white/[0.08] backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.18)] text-white space-y-5"
-      >
+    <div className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center select-none">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 px-6">
+        <div className="hidden md:block" />
+        <div className="flex justify-center md:justify-start md:pl-10 lg:pl-14">
+          <motion.div
+            initial={{ opacity: 0, x: 40, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 40, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+            className="pointer-events-auto w-full max-w-sm bg-white/[0.08] backdrop-blur-2xl border border-white/30 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.18)] text-white space-y-5 my-auto"
+          >
         {/* Header Panel & Close Button */}
         <div className="flex items-start justify-between">
           <div>
@@ -121,7 +124,9 @@ export function ProductDetailPanel({ product, onClose, onAddToCart }: ProductDet
             <ArrowRight className="w-3 h-3" />
           </button>
         </div>
-      </motion.div>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

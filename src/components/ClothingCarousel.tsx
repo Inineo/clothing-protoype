@@ -77,7 +77,7 @@ export function ClothingCarousel({
 
       {/* Embla Viewport */}
       <div
-        className="w-full cursor-grab active:cursor-grabbing relative z-20 overflow-clip"
+        className="w-full cursor-grab active:cursor-grabbing relative z-20"
         style={{
           marginTop: `${CAROUSEL_SIZING_CONFIG.globalOffsetY}px`,
           perspective: '1200px',
@@ -118,8 +118,10 @@ export function ClothingCarousel({
 
             const sideShiftX = isSelected ? 0 : diff < 0 ? 55 : -55;
 
-            // Animasi seamless: saat mode detail terbuka, baju yang dipilih meluncur ke kiri (-220px)
-            const activeX = isSelected && isDetailOpen ? -220 : sideShiftX;
+            // Animasi seamless: saat mode detail terbuka, baju meluncur ke kiri dengan ukuran pas (scale 1.0) dan turun seimbang
+            const activeX = isSelected && isDetailOpen ? -310 : sideShiftX;
+            const activeY = isSelected && isDetailOpen ? 40 : 0;
+            const activeScale = 1; // Ukuran tetap asli tidak diperbesar ekstra agar tidak raksasa
 
             return (
               <div
@@ -142,6 +144,8 @@ export function ClothingCarousel({
                 <motion.div
                   animate={{
                     x: activeX,
+                    y: activeY,
+                    scale: activeScale,
                     opacity: isDetailOpen ? (isSelected ? 1 : 0) : 1, // Baju samping memudar saat detail buka
                   }}
                   transition={{
@@ -149,7 +153,7 @@ export function ClothingCarousel({
                     stiffness: 240,
                     damping: 28,
                   }}
-                  className="relative w-full h-[660px] flex items-start justify-center cursor-pointer origin-top"
+                  className="relative w-full h-[760px] flex items-start justify-center cursor-pointer origin-center"
                 >
                   {/* LAYER FRONT */}
                   <motion.div
