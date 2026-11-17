@@ -10,11 +10,17 @@ import { CAROUSEL_SIZING_CONFIG } from '@/config/carouselConfig';
 interface ClothingCarouselProps {
   products: Product[];
   onSelectProduct: (product: Product) => void;
+  onOpenDetail?: (product: Product) => void;
+  isDetailOpen?: boolean;
 }
 
-export function ClothingCarousel({ products, onSelectProduct }: ClothingCarouselProps) {
-  // Duplikasi 4x untuk infinite loop
-  const displayItems = [...products, ...products, ...products, ...products];
+export function ClothingCarousel({
+  products,
+  onSelectProduct,
+  onOpenDetail,
+  isDetailOpen = false,
+}: ClothingCarouselProps) {
+  const displayItems = products.length < 15 ? [...products, ...products, ...products] : products;
   const total = displayItems.length;
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -25,6 +31,7 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
     skipSnaps: false,
     dragFree: false,
     containScroll: false,
+    watchDrag: !isDetailOpen, // Kunci scroll saat sedang di mode detail
   });
 
   const onSelect = useCallback(() => {
@@ -56,24 +63,30 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
 
   return (
     <div className="relative w-full max-w-7xl mx-auto flex flex-col items-center">
-      {/* Horizontal Hanging 3D Metallic Rail */}
-      <div className="absolute top-[32px] left-0 right-0 h-4 z-10 mx-[-20vw] pointer-events-none">
+      {/* Horizontal Hanging 3D Metallic Rail (Hilang saat detail view aktif) */}
+      <motion.div
+        animate={{ opacity: isDetailOpen ? 0 : 1 }}
+        transition={{ duration: 0.3 }}
+        className="absolute top-[32px] left-0 right-0 h-4 z-10 mx-[-20vw] pointer-events-none"
+      >
         <div className="w-full h-full rounded-full shadow-[0_10px_20px_rgba(0,0,0,0.35),0_3px_6px_rgba(0,0,0,0.4)] bg-gradient-to-b from-zinc-700 via-white via-[28%] via-zinc-900 via-[45%] to-black" />
         <div className="absolute top-[2px] left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/80 to-transparent blur-[0.3px]" />
         <div className="absolute bottom-[1px] left-0 right-0 h-[1px] bg-zinc-600/40" />
         <div className="absolute top-[16px] left-0 right-0 h-3 bg-black/15 blur-md" />
-      </div>
+      </motion.div>
 
       {/* Embla Viewport */}
       <div
-        className="overflow-hidden w-full cursor-grab active:cursor-grabbing relative z-20"
+        className="w-full cursor-grab active:cursor-grabbing relative z-20 overflow-clip"
         style={{
           marginTop: `${CAROUSEL_SIZING_CONFIG.globalOffsetY}px`,
           perspective: '1200px',
-          maskImage:
-            'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+          maskImage: isDetailOpen
+            ? 'none'
+            : 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
+          WebkitMaskImage: isDetailOpen
+            ? 'none'
+            : 'linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%)',
         }}
         ref={emblaRef}
       >
@@ -85,9 +98,9 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
             if (diff > total / 2) diff -= total;
             if (diff < -total / 2) diff += total;
 
-            const isOffscreen = Math.abs(diff) >= 4;
+            const isOffscreen = Math.abs(diff) >= 3;
 
-            // Transform front vs side
+            // Transform front vs side (nilai asli pengguna)
             const frontT = product.front;
             const sideT = product.side;
 
@@ -105,38 +118,49 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
 
             const sideShiftX = isSelected ? 0 : diff < 0 ? 55 : -55;
 
+            // Animasi seamless: saat mode detail terbuka, baju yang dipilih meluncur ke kiri (-220px)
+            const activeX = isSelected && isDetailOpen ? -220 : sideShiftX;
+
             return (
               <div
                 key={`${product.id}-${index}`}
-                onClick={() => scrollTo(index)}
+                onClick={() => {
+                  if (isSelected && onOpenDetail) {
+                    onOpenDetail(product);
+                  } else if (!isDetailOpen) {
+                    scrollTo(index);
+                  }
+                }}
                 className={`${CAROUSEL_SIZING_CONFIG.slideWidthClass} ${CAROUSEL_SIZING_CONFIG.overlapMarginClass} min-w-0 flex justify-center`}
                 style={{
                   zIndex: isSelected ? 40 : Math.max(1, 30 - Math.abs(diff)),
                   visibility: isOffscreen ? 'hidden' : 'visible',
+                  pointerEvents: isDetailOpen && !isSelected ? 'none' : 'auto',
                 }}
               >
-                {/* Animasi pergeseran fisik baju saat berpindah posisi */}
+                {/* Motion container menggeser baju aktif ke kiri dengan spring halus (tanpa fade/teleport) */}
                 <motion.div
                   animate={{
-                    x: sideShiftX,
+                    x: activeX,
+                    opacity: isDetailOpen ? (isSelected ? 1 : 0) : 1, // Baju samping memudar saat detail buka
                   }}
                   transition={{
                     type: 'spring',
-                    stiffness: 300,
+                    stiffness: 240,
                     damping: 28,
                   }}
                   className="relative w-full h-[660px] flex items-start justify-center cursor-pointer origin-top"
                 >
-                  {/* LAYER FRONT: Memutar masuk halus ke depan saat aktif */}
+                  {/* LAYER FRONT */}
                   <motion.div
                     initial={false}
                     animate={{
                       opacity: isSelected ? 1 : 0,
-                      rotateY: isSelected ? 0 : -22,
+                      rotateY: isSelected ? 0 : -20,
                       scale: isSelected ? 1 : 0.94,
                     }}
                     transition={{
-                      duration: 0.38,
+                      duration: 0.35,
                       ease: [0.25, 1, 0.5, 1],
                     }}
                     style={{ transformOrigin: 'top center' }}
@@ -153,16 +177,16 @@ export function ClothingCarousel({ products, onSelectProduct }: ClothingCarousel
                     />
                   </motion.div>
 
-                  {/* LAYER SIDE: Memutar keluar halus ke samping saat tidak aktif */}
+                  {/* LAYER SIDE */}
                   <motion.div
                     initial={false}
                     animate={{
                       opacity: isSelected ? 0 : 1,
-                      rotateY: isSelected ? 22 : 0,
+                      rotateY: isSelected ? 20 : 0,
                       scale: isSelected ? 1.06 : 1,
                     }}
                     transition={{
-                      duration: 0.38,
+                      duration: 0.35,
                       ease: [0.25, 1, 0.5, 1],
                     }}
                     style={{ transformOrigin: 'top center' }}
